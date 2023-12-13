@@ -15,6 +15,27 @@ class SudokuSolver {
 
   }
 
+  // string to 2d array
+
+  stringToBoard(sudokuString) {
+    const SIZE = 9; // for 9x9 sudoku board
+    const board = [];
+    
+    // split the string into rows for the sudoku board
+    for (let row = 0; row < SIZE; row++) {
+    const start = row * SIZE;
+    const end = start + SIZE;
+    board[row] = sudokuString.substring(start, end).split(' ');
+    }
+    
+    return board;
+    }
+    
+    //examples:
+    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
+    const board = stringToBoard(sudokuString);
+    console.log(board);
+
   function solveSudoku(board) {
     const SIZE = 9;
     const BOX_SIZE = 3;
@@ -72,20 +93,50 @@ class SudokuSolver {
         return true;
     }
     // show example usage
-      const board =[
-      ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
-      ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
-      ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
-      ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
-      ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
-      ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
-      ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
-      ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
-      ['.', '.', '.', '.', '8', '.', '.', '7', '9']
-      ];
+      // const board =[
+      // ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
+      // ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
+      // ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
+      // ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
+      // ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
+      // ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
+      // ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
+      // ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
+      // ['.', '.', '.', '.', '8', '.', '.', '7', '9']
+      // ];
 
-      console.log(solveSudoku(board));
+      solve();
+      return board;
+
+      // console.log(solveSudoku(board));
   }
+  
+  // solve complete sudoku board
+
+  completeSudoku(puzzleString) {
+    const board = this.stringToBoard(puzzleString);
+    const solvedBoard = this.solveSudoku(board);
+    return solvedBoard.flat().join('');
+  }
+  
+  function stringToBoard(sudokuString) {
+    const SIZE = 9; // for 9x9 sudoku board
+    const board = [];
+    
+    // split the string into rows for the sudoku board
+    for (let row = 0; row < SIZE; row++) {
+    const start = row * SIZE;
+    const end = start + SIZE;
+    board[row] = sudokuString.substring(start, end).split(' ');
+    }
+    
+    return board;
+    }
+    
+    //examples:
+    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
+    const board = stringToBoard(sudokuString);
+    console.log(board);
 }
 
 module.exports = SudokuSolver;
