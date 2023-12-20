@@ -36,7 +36,7 @@ class SudokuSolver {
     const board = stringToBoard(sudokuString);
     console.log(board);
 
-  function solveSudoku(board) {
+solveSudoku(board) {
     const SIZE = 9;
     const BOX_SIZE = 3;
     const EMPTY = ".";
@@ -113,7 +113,7 @@ class SudokuSolver {
   
   // solve complete sudoku board
 
-  completeSudoku(puzzleString) {
+  function completeSudoku(puzzleString) {
     const board = this.stringToBoard(puzzleString);
     const solvedBoard = this.solveSudoku(board);
     return solvedBoard.flat().join('');
