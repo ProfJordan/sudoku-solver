@@ -15,27 +15,6 @@ class SudokuSolver {
 
   }
 
-  // string to 2d array
-
-  stringToBoard(sudokuString) {
-    const SIZE = 9; // for 9x9 sudoku board
-    const board = [];
-    
-    // split the string into rows for the sudoku board
-    for (let row = 0; row < SIZE; row++) {
-    const start = row * SIZE;
-    const end = start + SIZE;
-    board[row] = sudokuString.substring(start, end).split(' ');
-    }
-    
-    return board;
-    }
-    
-    //examples:
-    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.';
-    const board = stringToBoard(sudokuString);
-    // console.log(board);
-
 solveSudoku(board) {
     const SIZE = 9;
     const BOX_SIZE = 3;

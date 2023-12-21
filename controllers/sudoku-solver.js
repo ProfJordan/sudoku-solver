@@ -1,5 +1,9 @@
 class SudokuSolver {
 
+  constructor() {
+    this.solvedBoards = [];
+  }
+
   validate(puzzleString) {
   }
 
@@ -15,129 +19,118 @@ class SudokuSolver {
 
   }
 
-  // string to 2d array
-
-  stringToBoard(sudokuString) {
-    const SIZE = 9; // for 9x9 sudoku board
-    const board = [];
-    
-    // split the string into rows for the sudoku board
-    for (let row = 0; row < SIZE; row++) {
-    const start = row * SIZE;
-    const end = start + SIZE;
-    board[row] = sudokuString.substring(start, end).split(' ');
-    }
-    
-    return board;
-    }
-    
-    //examples:
-    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
-    const board = stringToBoard(sudokuString);
-    console.log(board);
-
-solveSudoku(board) {
-    const SIZE = 9;
-    const BOX_SIZE = 3;
-    const EMPTY = ".";
-
-    //add a utility function to check if a number can be placed in a given position
-    function canPlace(board, row, col, num) {
-      //check row
-      for (let i = 0; i < SIZE; i++) {
-        if (board[row][i] == num) {
-          return false;
-        }
+  //Sudoku Solver Function - Start
+  solve(puzzleString) {
+    function sudokuSolver(board) {
+      const rows = 9;
+      const cols = 9;
+      const stack = [];
+     
+      function findUnassignedLocation(board) {
+         for (let i = 0; i < rows; i++) {
+           for (let j = 0; j < cols; j++) {
+             if (board[i][j] === 0) {
+               return [i, j];
+             }
+           }
+         }
+         return null;
       }
-
-      const startRow = row - (row % BOX_SIZE);
-      const startCol = col - (col % BOX_SIZE);
-
-      //check column
-      // for (let i = 0; i < SIZE; i++) {
-      //   if (board[i][col] == num) {
-      //     return false;
-      //   }
-      // }
-      
-      //check box
-
-      for (let i = 0; i < BOX_SIZE; i++) {
-        for (let j = 0; j < BOX_SIZE; j++) {
-          if (board[startRow + i][startCol + j] == num) {
-            return false;
-          }
-        }
+     
+      function isValid(board, num, position) {
+         const [row, col] = position;
+     
+         // Check if 'num' is not already placed in current row / column
+         for (let i = 0; i < cols; i++) {
+           if (board[row][i] === num || board[i][col] === num) {
+             return false;
+           }
+         }
+     
+         // Check if 'num' is not placed in current 3x3 box
+         const boxRowStart = row - row % 3;
+         const boxColStart = col - col % 3;
+         for (let i = boxRowStart; i < boxRowStart + 3; i++) {
+           for (let j = boxColStart; j < boxColStart + 3; j++) {
+             if (board[i][j] === num) {
+               return false;
+             }
+           }
+         }
+     
+         return true;
       }
-      return true;
-    }
-
-    // add main solver function using backtracking
-    function solve() {
-      for (let row = 0; row < SIZE; row++) {
-        for (let col = 0; col < SIZE; col++) {
-          if (board[row][col] === EMPTY) {
-            for (let num = 1; num <= SIZE; num++) {
-              if (canPlace(board, row, col, num.toString())) {
-                board[row][col] = num.toString();
-                if (solve()) {
-                  return true;
-                } else {
-                  board[row][col] = EMPTY;
-                }
-              }
-            }
-            return false;
-          }
-        }
-        return true;
-    }
-    // show example usage
-      // const board =[
-      // ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
-      // ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
-      // ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
-      // ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
-      // ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
-      // ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
-      // ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
-      // ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
-      // ['.', '.', '.', '.', '8', '.', '.', '7', '9']
-      // ];
-
-      solve();
-      return board;
-
-      // console.log(solveSudoku(board));
+     
+      function solveSudoku(board) {
+         const position = findUnassignedLocation(board);
+         if (position === null) {
+           return true;
+         }
+     
+         const [row, col] = position;
+         for (let num = 1; num <= 9; num++) {
+           if (isValid(board, num, [row, col])) {
+             board[row][col] = num;
+             stack.push([board, row, col, num])
+             if (solveSudoku(board)) {
+               return true;
+             }
+           }
+           board[row][col] = 0;
+         }
+         return false;
+      }
+     
+      if (solveSudoku(board)) {
+         return board;
+      } else {
+         if (stack.length > 0) {
+           const prevState = stack.pop();
+           const updatedBoard = prevState[0];
+           const prevNum = prevState[3];
+           updatedBoard[prevState[1]][prevState[2]] = 0;
+           return sudokuSolver(updatedBoard);
+         } else {
+           return null;
+         }
+      }
+     }
   }
-  
-  // solve complete sudoku board
+  //Sudoku Solver Function - End
 
-  function completeSudoku(puzzleString) {
+  /* string to 2d array function - Start */
+
+    stringToBoard(sudokuString) {
+      const SIZE = 9; // for 9x9 sudoku board
+      const board = [];
+      
+      // split the string into rows for the sudoku board
+      for (let row = 0; row < SIZE; row++) {
+      const start = row * SIZE;
+      const end = start + SIZE;
+      board[row] = sudokuString.substring(start, end).split(' ');
+      }
+      
+      this.solve();
+      return board;
+      }
+      
+      //examples:
+      const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.';
+      const board = stringToBoard(sudokuString);
+      // console.log(board);
+
+  /* string to 2d array function - End */
+
+// Solve Complete Board - Start
+
+  solveCompleteBoard(puzzleString) {
     const board = this.stringToBoard(puzzleString);
     const solvedBoard = this.solveSudoku(board);
     return solvedBoard.flat().join('');
   }
-  
-  function stringToBoard(sudokuString) {
-    const SIZE = 9; // for 9x9 sudoku board
-    const board = [];
-    
-    // split the string into rows for the sudoku board
-    for (let row = 0; row < SIZE; row++) {
-    const start = row * SIZE;
-    const end = start + SIZE;
-    board[row] = sudokuString.substring(start, end).split(' ');
-    }
-    
-    return board;
-    }
-    
-    //examples:
-    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
-    const board = stringToBoard(sudokuString);
-    console.log(board);
+// Solve Complete Board - End
+
 }
 
 module.exports = SudokuSolver;
-
