@@ -19,7 +19,7 @@ class SudokuSolver {
 
   }
 
-  //Sudoku Solver Function - Start
+  // Sudoku Solver Function - Start
   solve(puzzleString) {
     function sudokuSolver(board) {
       const rows = 9;
@@ -96,7 +96,7 @@ class SudokuSolver {
       }
      }
   }
-  //Sudoku Solver Function - End
+  // Sudoku Solver Function - End
 
   /* string to 2d array function - Start */
 
