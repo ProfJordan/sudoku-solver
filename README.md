@@ -1,4 +1,5 @@
 # Sudoku Solver for FCC QA Cert
 
-## References:
-Top 95 Hardest Sudoku List: https://magictour.free.fr/top95/
+## References
+
+[https://magictour.free.fr/top95/](Top 95 Hardest Sudoku List)
