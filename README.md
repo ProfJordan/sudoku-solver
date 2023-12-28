@@ -2,4 +2,4 @@
 
 ## References
 
-[https://magictour.free.fr/top95/](Top 95 Hardest Sudoku List)
+[Top 95 Hardest Sudoku List](https://magictour.free.fr/top95/)
