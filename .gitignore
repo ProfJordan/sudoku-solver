@@ -1,4 +1,8 @@
 .vscode/*
+.DS_Store
 .env
 .glitch-assets
+sudoku-solver-old.js
+sudoku-solver-old2.js
 node_modules/
+package-lock.json
