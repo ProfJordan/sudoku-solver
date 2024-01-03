@@ -1,143 +1,274 @@
 class SudokuSolver {
 
+  rowNumber(letter){
+    let number = letter.codePointAt()
+
+    if(number < 10 || isNaN(number)){
+      return 'Invalid'
+    }
+
+    return number >= 65 && number <= 90 ? number - 64 : number >= 97 && number <= 122 ? number - 96 : 'Invalid'
+  }
+
+  validateColumnRow(column, row){
+    if(row == 'Invalid' || row > 9){
+      return false
+    } else if(column < 1 || column > 9 || isNaN(column)){
+      return false
+    } else {
+      return true
+    }
+  }
+
   validate(puzzleString) {
+    if(puzzleString.length != 81){
+      return { "error": "Expected puzzle to be 81 characters long" }
+    }
+
+    let regDot = /[^\.]/g
+    let notPoint = puzzleString.match(regDot)
+
+    for(let i in notPoint){
+      if(notPoint[i].match(/\D/) || notPoint[i].match(/0/)){
+        return { "error": "Invalid characters in puzzle" }
+      }
+    }
+
+    return 'valid'
   }
 
   checkRowPlacement(puzzleString, row, column, value) {
+    let data = puzzleString.substr((row - 1) * 9, 9)
+    data = data.substring(0, column - 1) + data.substring(column)
 
+    if(data.match(new RegExp(value, 'g'))){
+      return {'valid': false, 'conflict': 'row'}
+    }
+
+    return {'valid': true}
   }
 
   checkColPlacement(puzzleString, row, column, value) {
+    let data = ''
+    let i = column - 1
 
+    while(i < 81){
+      data += puzzleString[i]
+      i += 9
+    }
+
+    data = data.substring(0, row - 1) + data.substring(row)
+
+    if(data.match(new RegExp(value, 'g'))){
+      return {'valid': false, 'conflict': 'column'}
+    }
+
+    return {'valid': true}
   }
 
   checkRegionPlacement(puzzleString, row, column, value) {
+    let data = ''
+    
+    let conversion1 = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 3,
+      5: 3,
+      6: 3,
+      7: 6,
+      8: 6,
+      9: 6
+    }
 
+    let conversion2 = {
+      1: 0,
+      2: 1,
+      3: 2,
+      4: 0,
+      5: 1,
+      6: 2,
+      7: 0,
+      8: 1,
+      9: 2
+    }
+
+    for(let i = 0; i <= 2; i++){
+      for(let c = 0; c <= 2; c++){
+        let col = conversion1[column] + i
+        let r = conversion1[row] + c
+        data += puzzleString[col + r * 9]
+      }
+    }
+
+    let position = conversion2[column] * 3 + conversion2[row]
+    data = data.substring(0, position) + data.substring(position + 1)
+
+    if(data.match(new RegExp(value, 'g'))){
+      return {'valid': false, 'conflict': 'region'}
+    }
+
+    return {'valid': true}
   }
 
-  // string to 2d array
+  checkPlacement(puzzleString, row, column, value) {
+    row = this.rowNumber(row)
+    column = Number.parseInt(column)
+    value = Number.parseInt(value)
 
-  stringToBoard(sudokuString) {
-    const SIZE = 9; // for 9x9 sudoku board
-    const board = [];
-    
-    // split the string into rows for the sudoku board
-    for (let row = 0; row < SIZE; row++) {
-    const start = row * SIZE;
-    const end = start + SIZE;
-    board[row] = sudokuString.substring(start, end).split(' ');
+    if(value < 1 || value > 9 || isNaN(value)){
+      return { "error": "Invalid value" }
     }
-    
-    return board;
+
+    if(!this.validateColumnRow(column, row)){
+      return { "error": "Invalid coordinate" }
     }
-    
-    //examples:
-    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
-    const board = stringToBoard(sudokuString);
-    console.log(board);
 
-solveSudoku(board) {
-    const SIZE = 9;
-    const BOX_SIZE = 3;
-    const EMPTY = ".";
+    let problems = []
+    problems.push(this.checkRowPlacement(puzzleString, row, column, value))
+    problems.push(this.checkColPlacement(puzzleString, row, column, value))
+    problems.push(this.checkRegionPlacement(puzzleString, row, column, value))
+    let result = []
 
-    //add a utility function to check if a number can be placed in a given position
-    function canPlace(board, row, col, num) {
-      //check row
-      for (let i = 0; i < SIZE; i++) {
-        if (board[row][i] == num) {
-          return false;
-        }
+    for(let i in problems){
+      if(!problems[i]['valid']){
+        result.push(problems[i]['conflict'])
       }
-
-      const startRow = row - (row % BOX_SIZE);
-      const startCol = col - (col % BOX_SIZE);
-
-      //check column
-      // for (let i = 0; i < SIZE; i++) {
-      //   if (board[i][col] == num) {
-      //     return false;
-      //   }
-      // }
-      
-      //check box
-
-      for (let i = 0; i < BOX_SIZE; i++) {
-        for (let j = 0; j < BOX_SIZE; j++) {
-          if (board[startRow + i][startCol + j] == num) {
-            return false;
-          }
-        }
-      }
-      return true;
     }
 
-    // add main solver function using backtracking
-    function solve() {
-      for (let row = 0; row < SIZE; row++) {
-        for (let col = 0; col < SIZE; col++) {
-          if (board[row][col] === EMPTY) {
-            for (let num = 1; num <= SIZE; num++) {
-              if (canPlace(board, row, col, num.toString())) {
-                board[row][col] = num.toString();
-                if (solve()) {
-                  return true;
-                } else {
-                  board[row][col] = EMPTY;
-                }
+    if(result.length > 0){
+      return {'valid': false, 'conflict': result}
+    } else {
+      return problems[0]
+    }
+  }
+
+  toLetter(position){
+    let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    let indice = 0
+
+    while(position > 9){
+      indice++
+      position -= 9
+    }
+
+    return letters[indice]
+  }
+
+  column(position){
+    while(position > 9){
+      position -= 9
+    }
+
+    return position
+  }
+
+  loop(puzzle, moreThan1Possibility = false){
+    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    let options = []
+    let someChange = false
+
+    if(moreThan1Possibility){
+      let changed = false
+
+      while(!changed){
+        for(let i in puzzle){
+          i = Number.parseInt(i)
+
+          if(puzzle[i] == '.'){
+            for(let n in numbers){
+              n = Number.parseInt(n)
+
+              if(this.checkPlacement(puzzle, this.toLetter(i + 1), this.column(i + 1), n + 1)['valid']){
+                puzzle = puzzle.split('')
+                puzzle[i] = n + 1
+                puzzle = puzzle.join('')
+                someChange = true 
+                changed = true
+                break
               }
             }
-            return false;
+
+            if(changed){
+              break
+            }
           }
         }
-        return true;
+      }
     }
-    // show example usage
-      // const board =[
-      // ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
-      // ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
-      // ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
-      // ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
-      // ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
-      // ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
-      // ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
-      // ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
-      // ['.', '.', '.', '.', '8', '.', '.', '7', '9']
-      // ];
 
-      solve();
-      return board;
+    for(let i in puzzle){
+      i = Number.parseInt(i)
 
-      // console.log(solveSudoku(board));
-  }
+      if(puzzle[i] == '.'){
+        for(let n in numbers){
+          n = Number.parseInt(n)
+
+          if(this.checkPlacement(puzzle, this.toLetter(i + 1), this.column(i + 1), n + 1)['valid']){
+            options.push(n + 1)
   
-  // solve complete sudoku board
-
-  function completeSudoku(puzzleString) {
-    const board = this.stringToBoard(puzzleString);
-    const solvedBoard = this.solveSudoku(board);
-    return solvedBoard.flat().join('');
-  }
+            if(options.length > 1){
+              break
+            }
+          }
+        }
   
-  function stringToBoard(sudokuString) {
-    const SIZE = 9; // for 9x9 sudoku board
-    const board = [];
-    
-    // split the string into rows for the sudoku board
-    for (let row = 0; row < SIZE; row++) {
-    const start = row * SIZE;
-    const end = start + SIZE;
-    board[row] = sudokuString.substring(start, end).split(' ');
+        if(options.length == 0){
+          return { error: 'Puzzle cannot be solved' }
+        } else if(options.length == 1){
+          puzzle = puzzle.split('')
+          puzzle[i] = options[0]
+          puzzle = puzzle.join('')
+          someChange = true
+        }
+
+        options = []
+      }
+
+      if(i == 80 && !someChange){
+        return 'more than 1 possibility'
+      }
     }
-    
-    return board;
+
+    if(!puzzle.match(/\./g)){
+      return {solution: puzzle}
     }
-    
-    //examples:
-    const sudokuString = '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'
-    const board = stringToBoard(sudokuString);
-    console.log(board);
+
+    if(someChange){
+      return puzzle
+    }
+  }
+
+  solve(puzzle) {
+    let validate = this.validate(puzzle)
+
+    if(validate != 'valid'){
+      return validate
+    }
+
+    let result = undefined
+
+    while(result == undefined){
+      let loopResult = this.loop(puzzle, false)
+
+      if(loopResult == 'more than 1 possibility'){
+        loopResult = this.loop(puzzle, true)
+
+        if(typeof loopResult == 'string'){
+          puzzle = loopResult
+        } else if (typeof loopResult == 'object'){
+          result = loopResult
+        }
+
+      } else if(typeof loopResult == 'string'){
+        puzzle = loopResult
+      } else if (typeof loopResult == 'object'){
+        result = loopResult
+      }
+    }
+
+    return result
+  }
 }
 
 module.exports = SudokuSolver;
-
